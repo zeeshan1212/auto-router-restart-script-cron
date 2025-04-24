@@ -12,11 +12,13 @@ An automated Node.js script to reset a Skyworth router on a daily schedule.
 - Reboot progress tracking
 - Router recovery verification
 - Secure credential management using environment variables
+- PM2 process management with detailed logging
 
 ## Prerequisites
 
 - Node.js (v14 or higher)
 - npm (Node Package Manager)
+- PM2 (installed globally or as dev dependency)
 
 ## Installation
 
@@ -46,13 +48,50 @@ The script uses environment variables for configuration. You can set these in a 
 
 ## Usage
 
-### Test Mode
+### Using PM2 (Recommended)
+
+PM2 provides process management, auto-restart, and detailed logging. The following npm scripts are available:
+
+```bash
+# Start the application with PM2
+npm run pm2:start
+
+# View logs
+npm run pm2:logs
+
+# Monitor the application
+npm run pm2:monitor
+
+# Check status
+npm run pm2:status
+
+# Stop the application
+npm run pm2:stop
+
+# Restart the application
+npm run pm2:restart
+```
+
+Logs are stored in the `logs` directory:
+- `logs/router-reset.log`: Standard output logs
+- `logs/router-reset-error.log`: Error logs
+
+Log features:
+- Indian timezone (Asia/Kolkata)
+- Timestamp prefix on each log
+- Automatic log rotation (max 10MB per file)
+- JSON format for structured logging
+- Maximum 10 log files kept
+
+### Manual Usage
+
+#### Test Mode
 To test the script immediately:
 ```bash
 node router-reset.js --test
 ```
 
-### Scheduled Mode
+#### Scheduled Mode
 To run the script in scheduled mode (resets at 6 AM daily):
 ```bash
 node router-reset.js
@@ -76,6 +115,7 @@ The script includes comprehensive error handling and will:
 - Take screenshots at error points
 - Handle network disconnections during reboot
 - Verify router recovery after reboot
+- Store detailed logs with timestamps
 
 ## Security Note
 
