@@ -1,0 +1,14 @@
+{
+  "name": "router-reset",
+  "version": "1.0.0",
+  "description": "Automated router reset script",
+  "main": "router-reset.js",
+  "scripts": {
+    "start": "node router-reset.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "node-cron": "^3.0.3",
+    "puppeteer": "^22.3.0"
+  }
+}
