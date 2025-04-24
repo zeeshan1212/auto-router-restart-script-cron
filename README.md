@@ -11,6 +11,7 @@ An automated Node.js script to reset a Skyworth router on a daily schedule.
 - Support for confirmation dialogs
 - Reboot progress tracking
 - Router recovery verification
+- Secure credential management using environment variables
 
 ## Prerequisites
 
@@ -24,18 +25,24 @@ An automated Node.js script to reset a Skyworth router on a daily schedule.
    ```bash
    npm install
    ```
+3. Set up environment variables:
+   ```bash
+   # Create .env file
+   cp .env.example .env
+   
+   # Edit .env file with your router credentials
+   ROUTER_URL=http://192.168.1.1
+   ROUTER_USERNAME=admin
+   ROUTER_PASSWORD=your_password_here
+   ```
 
 ## Configuration
 
-Edit the `routerConfig` object in `router-reset.js` to match your router settings:
+The script uses environment variables for configuration. You can set these in a `.env` file:
 
-```javascript
-const routerConfig = {
-    url: 'http://192.168.1.1',
-    username: 'admin',
-    password: 'your_password'
-};
-```
+- `ROUTER_URL`: Your router's URL (default: http://192.168.1.1)
+- `ROUTER_USERNAME`: Router login username (default: admin)
+- `ROUTER_PASSWORD`: Router login password (required)
 
 ## Usage
 
@@ -73,6 +80,7 @@ The script includes comprehensive error handling and will:
 ## Security Note
 
 Please ensure to:
+- Never commit your `.env` file to version control
 - Keep your router password secure
 - Don't share the configured script with others
-- Consider using environment variables for sensitive information 
+- Use environment variables for all sensitive information 

@@ -2,10 +2,16 @@ const cron = require('node-cron');
 const puppeteer = require('puppeteer');
 
 const routerConfig = {
-    url: 'http://192.168.1.1',
-    username: 'admin',
-    password: 'br0adband'
+    url: process.env.ROUTER_URL || 'http://192.168.1.1',
+    username: process.env.ROUTER_USERNAME || 'admin',
+    password: process.env.ROUTER_PASSWORD // Password must be provided via environment variable
 };
+
+// Validate required environment variables
+if (!process.env.ROUTER_PASSWORD) {
+    console.error('Error: ROUTER_PASSWORD environment variable is required');
+    process.exit(1);
+}
 
 // Helper function for delay
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
