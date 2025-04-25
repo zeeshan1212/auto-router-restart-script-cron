@@ -5,7 +5,8 @@ const puppeteer = require('puppeteer');
 const routerConfig = {
     url: process.env.ROUTER_URL || 'http://192.168.1.1',
     username: process.env.ROUTER_USERNAME || 'admin',
-    password: process.env.ROUTER_PASSWORD // Password must be provided via environment variable
+    password: process.env.ROUTER_PASSWORD, // Password must be provided via environment variable
+    debug: process.env.DEBUG === 'true' // Add debug flag
 };
 
 // Validate required environment variables
@@ -16,6 +17,14 @@ if (!process.env.ROUTER_PASSWORD) {
 
 // Helper function for delay
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to take screenshot if debug is enabled
+async function takeScreenshot(page, filename) {
+    if (routerConfig.debug) {
+        await page.screenshot({ path: filename });
+        console.log(`Saved screenshot as ${filename}`);
+    }
+}
 
 // Helper function to find elements by text content
 async function findElementByText(page, selector, text) {
@@ -38,9 +47,8 @@ async function monitorRebootProgress(page) {
 
     while (attempts < maxAttempts) {
         try {
-            // Take a screenshot of the progress
-            await page.screenshot({ path: `router-reboot-progress-${attempts}.png` });
-            console.log(`Saved reboot progress screenshot ${attempts}`);
+            // Take a screenshot of the progress if debug is enabled
+            await takeScreenshot(page, `router-reboot-progress-${attempts}.png`);
 
             // Try to find progress information on the page
             const content = await page.content();
@@ -48,7 +56,7 @@ async function monitorRebootProgress(page) {
             // Check if we see any progress indicators
             if (content.includes('100%') || content.toLowerCase().includes('reboot complete')) {
                 console.log('Reboot completed successfully!');
-                await page.screenshot({ path: 'router-reboot-complete.png' });
+                await takeScreenshot(page, 'router-reboot-complete.png');
                 return true;
             } else if (content.toLowerCase().includes('rebooting') || content.toLowerCase().includes('please wait')) {
                 console.log('Router is still rebooting...');
@@ -100,9 +108,8 @@ async function resetRouter() {
         console.log('Waiting for page to load...');
         await delay(2000);
 
-        // Take a screenshot for debugging
-        await page.screenshot({ path: 'router-login.png' });
-        console.log('Saved screenshot as router-login.png');
+        // Take a screenshot for debugging if enabled
+        await takeScreenshot(page, 'router-login.png');
 
         // Type username and password
         console.log('Entering credentials...');
@@ -149,9 +156,8 @@ async function resetRouter() {
         console.log('Waiting for login to complete...');
         await delay(5000);
 
-        // Take another screenshot after login
-        await page.screenshot({ path: 'router-logged-in.png' });
-        console.log('Saved post-login screenshot as router-logged-in.png');
+        // Take another screenshot after login if debug is enabled
+        await takeScreenshot(page, 'router-logged-in.png');
 
         // Click on Status link
         console.log('Looking for Status link...');
@@ -167,9 +173,8 @@ async function resetRouter() {
             await delay(2000); // Wait for page to load
             console.log('Navigated to Status page');
             
-            // Take a screenshot of the status page
-            await page.screenshot({ path: 'router-status.png' });
-            console.log('Saved status page screenshot as router-status.png');
+            // Take a screenshot of the status page if debug is enabled
+            await takeScreenshot(page, 'router-status.png');
 
             // Look for the reboot form and button
             console.log('Looking for reboot button...');
@@ -215,28 +220,31 @@ async function resetRouter() {
                         waitUntil: 'networkidle0',
                         timeout: 30000
                     });
-                    await page.screenshot({ path: 'router-back-online.png' });
+                    await takeScreenshot(page, 'router-back-online.png');
                     console.log('Router is back online!');
                 } catch (error) {
                     console.log('Could not verify if router is back online:', error.message);
                 }
             } else {
                 console.log('Could not find reboot button');
-                console.log('Current page HTML:', await page.content());
+                if (routerConfig.debug) {
+                    console.log('Current page HTML:', await page.content());
+                }
             }
         } else {
             console.log('Could not find Status link');
-            console.log('Current page content:', await page.content());
+            if (routerConfig.debug) {
+                console.log('Current page content:', await page.content());
+            }
         }
 
     } catch (error) {
         console.error('Error during router reset:', error.message);
-        if (browser) {
+        if (browser && routerConfig.debug) {
             try {
                 const page = (await browser.pages())[0];
                 if (page) {
-                    await page.screenshot({ path: 'router-error.png' });
-                    console.log('Saved error state screenshot as router-error.png');
+                    await takeScreenshot(page, 'router-error.png');
                 }
             } catch (screenshotError) {
                 console.log('Failed to save error screenshot:', screenshotError.message);
